@@ -39,6 +39,8 @@ public class Calculator {
      */
     private int operatorCount = 0;
     private boolean lockDecimal = false;
+    private double result;
+    private boolean isResult = false;
 
     Calculator() {
         this.input = new ArrayList<>();
@@ -100,6 +102,7 @@ public class Calculator {
                 outputLabel.setText("");
                 operatorCount = 0;
                 lockDecimal = false;
+                isResult = false;
             }
         });
 
@@ -132,6 +135,16 @@ public class Calculator {
             public void actionPerformed(ActionEvent e) {
                 removeOperatorDuplicate();
                 removeOperatorDuplicate();
+                if (isResult) {
+                    input.clear();
+                    inputLabel.setText("");
+                    input.add(String.valueOf(result));
+                    output = new ArrayList<>();
+                    outputLabel.setText("");
+                    operatorCount = 0;
+                    lockDecimal = false;
+                    isResult = false;
+                }
                 input.add("/");
                 lockDecimal = false;
                 operatorCount++;
@@ -199,6 +212,16 @@ public class Calculator {
             public void actionPerformed(ActionEvent e) {
                 removeOperatorDuplicate();
                 removeOperatorDuplicate();
+                if (isResult) {
+                    input.clear();
+                    inputLabel.setText("");
+                    input.add(String.valueOf(result));
+                    output = new ArrayList<>();
+                    outputLabel.setText("");
+                    operatorCount = 0;
+                    lockDecimal = false;
+                    isResult = false;
+                }
                 input.add("*");
                 lockDecimal = false;
                 operatorCount++;
@@ -265,6 +288,16 @@ public class Calculator {
             @Override
             public void actionPerformed(ActionEvent e) {
                 lockDecimal = false;
+                if (isResult) {
+                    input.clear();
+                    inputLabel.setText("");
+                    input.add(String.valueOf(result));
+                    output = new ArrayList<>();
+                    outputLabel.setText("");
+                    operatorCount = 0;
+                    lockDecimal = false;
+                    isResult = false;
+                }
                 dealWithMinus();
                 updateInputLabel();
             }
@@ -330,6 +363,16 @@ public class Calculator {
             public void actionPerformed(ActionEvent e) {
                 removeOperatorDuplicate();
                 removeOperatorDuplicate();
+                if (isResult) {
+                    input.clear();
+                    inputLabel.setText("");
+                    input.add(String.valueOf(result));
+                    output = new ArrayList<>();
+                    outputLabel.setText("");
+                    operatorCount = 0;
+                    lockDecimal = false;
+                    isResult = false;
+                }
                 input.add("+");
                 lockDecimal = false;
                 operatorCount++;
@@ -563,21 +606,22 @@ public class Calculator {
     private void calculate() {
         int multiplicationIndex = this.output.indexOf(null);
         int left, right;
-        double result;
+
         while (multiplicationIndex != -1) {
             left = multiplicationIndex - 1;
             right = multiplicationIndex + 1;
-            result = (this.output.get(left)) * (this.output.get(right));
+            this.result = (this.output.get(left)) * (this.output.get(right));
             this.output.remove(left);
             this.output.remove(left);
             this.output.remove(left);
-            this.output.add(left, result);
+            this.output.add(left, this.result);
             multiplicationIndex = this.output.indexOf(null);
         }
-        result = 0;
+        this.result = 0;
         for (int i = 0; i < this.output.size(); i++) {
-            result += this.output.get(i);
+            this.result += this.output.get(i);
         }
-        outputLabel.setText(String.valueOf(result));
+        outputLabel.setText(String.valueOf(this.result));
+        isResult = true;
     }
 }
