@@ -42,6 +42,10 @@ public class Calculator {
     private double result;
     private boolean isResult = false;
 
+    /**
+     * After calling the constructor just run the program,
+     * the calculator will pop up in a fixed window
+     */
     Calculator() {
         this.input = new ArrayList<>();
         this.output = new ArrayList<>();
