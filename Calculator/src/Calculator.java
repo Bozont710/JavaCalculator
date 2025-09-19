@@ -3,6 +3,8 @@ import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -23,7 +25,7 @@ public class Calculator {
             five, six, seven, eight, nine,
             zero, decimal, addition, division,
             multiplication, subtraction, equals,
-            delete, clear;
+            delete, clear, history;
     /**
      * This was the quickest way I could think of to use a Set
      * for quick access to operators
@@ -42,8 +44,18 @@ public class Calculator {
      */
     private int operatorCount = 0;
     private boolean lockDecimal = false;
+    /**
+     * result displays the result of the equation and
+     * isResult checks if there was a result of a
+     * previous equation at which pressing an operator
+     * immediately after the equals sign, starts the
+     * equation with the previous result
+     */
     private double result;
     private boolean isResult = false;
+    private int width, height;
+    private boolean showHistory = false;
+    private FileWriter historyFile;
 
     /**
      * After calling the constructor just run the program,
@@ -52,9 +64,17 @@ public class Calculator {
     Calculator() {
         this.input = new ArrayList<>();
         this.output = new ArrayList<>();
+        try {
+            this.historyFile = new FileWriter("history.txt");
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         this.frame = new JFrame("Calculator");
-        this.frame.setSize(494, 637);
+        this.width = 494;
+        this.height = 637;
+        this.frame.setSize(this.width, this.height);
         this.frame.getContentPane().setLayout(null);
         this.frame.getContentPane().setBackground(new Color(0,0,0));
         this.inputLabel = new JLabel();
@@ -78,6 +98,8 @@ public class Calculator {
         this.equals = new JButton("=");
         this.delete = new JButton("DEL");
         this.clear = new JButton("CA");
+        this.history = new JButton("HIST");
+
 
         this.inputLabel.setBounds(0,0,480,50);
         this.inputLabel.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
@@ -103,18 +125,12 @@ public class Calculator {
         this.clear.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                input.clear();
-                output = new ArrayList<>();
-                inputLabel.setText("");
-                outputLabel.setText("");
-                operatorCount = 0;
-                lockDecimal = false;
-                isResult = false;
+                clear();
             }
         });
 
 
-        this.delete.setBounds(120,100,240,100);
+        this.delete.setBounds(120,100,120,100);
         this.delete.setSelected(false);
         this.delete.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
         this.delete.setBackground(new Color(255,106,0));
@@ -126,6 +142,27 @@ public class Calculator {
             public void actionPerformed(ActionEvent e) {
                 if (!input.isEmpty()) {
                     deleteLastElement();
+                }
+            }
+        });
+
+        this.history.setBounds(240, 100, 120, 100);
+        this.history.setSelected(false);
+        this.history.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
+        this.history.setBackground(new Color(255,106,0));
+        this.history.setBorder(new MatteBorder(4,4,4,4, new Color(245,96,0)));
+        this.history.setFocusPainted(false);
+        this.frame.add(this.history);
+        this.history.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showHistory = !showHistory;
+                if (showHistory) {
+                    width *= 2;
+                    frame.setSize(width, height);
+                } else {
+                    width /= 2;
+                    frame.setSize(width, height);
                 }
             }
         });
@@ -142,14 +179,8 @@ public class Calculator {
             public void actionPerformed(ActionEvent e) {
                 removeOperatorDuplicate();
                 if (isResult) {
-                    input.clear();
-                    inputLabel.setText("");
+                    clear();
                     input.add(String.valueOf(result));
-                    output = new ArrayList<>();
-                    outputLabel.setText("");
-                    operatorCount = 0;
-                    lockDecimal = false;
-                    isResult = false;
                 }
                 input.add("/");
                 lockDecimal = false;
@@ -168,6 +199,9 @@ public class Calculator {
         this.seven.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (isResult) {
+                    clear();
+                }
                 input.add("7");
                 operatorCount = 0;
                 updateInputLabel();
@@ -184,6 +218,9 @@ public class Calculator {
         this.eight.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (isResult) {
+                    clear();
+                }
                 input.add("8");
                 operatorCount = 0;
                 updateInputLabel();
@@ -200,6 +237,9 @@ public class Calculator {
         this.nine.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (isResult) {
+                    clear();
+                }
                 input.add("9");
                 operatorCount = 0;
                 updateInputLabel();
@@ -218,14 +258,8 @@ public class Calculator {
             public void actionPerformed(ActionEvent e) {
                 removeOperatorDuplicate();
                 if (isResult) {
-                    input.clear();
-                    inputLabel.setText("");
+                    clear();
                     input.add(String.valueOf(result));
-                    output = new ArrayList<>();
-                    outputLabel.setText("");
-                    operatorCount = 0;
-                    lockDecimal = false;
-                    isResult = false;
                 }
                 input.add("*");
                 lockDecimal = false;
@@ -244,6 +278,9 @@ public class Calculator {
         this.four.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (isResult) {
+                    clear();
+                }
                 input.add("4");
                 operatorCount = 0;
                 updateInputLabel();
@@ -260,6 +297,9 @@ public class Calculator {
         this.five.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (isResult) {
+                    clear();
+                }
                 input.add("5");
                 operatorCount = 0;
                 updateInputLabel();
@@ -276,6 +316,9 @@ public class Calculator {
         this.six.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (isResult) {
+                    clear();
+                }
                 input.add("6");
                 operatorCount = 0;
                 updateInputLabel();
@@ -294,14 +337,8 @@ public class Calculator {
             public void actionPerformed(ActionEvent e) {
                 lockDecimal = false;
                 if (isResult) {
-                    input.clear();
-                    inputLabel.setText("");
+                    clear();
                     input.add(String.valueOf(result));
-                    output = new ArrayList<>();
-                    outputLabel.setText("");
-                    operatorCount = 0;
-                    lockDecimal = false;
-                    isResult = false;
                 }
                 dealWithMinus();
                 updateInputLabel();
@@ -318,6 +355,9 @@ public class Calculator {
         this.one.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (isResult) {
+                    clear();
+                }
                 input.add("1");
                 operatorCount = 0;
                 updateInputLabel();
@@ -334,6 +374,9 @@ public class Calculator {
         this.two.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (isResult) {
+                    clear();
+                }
                 input.add("2");
                 operatorCount = 0;
                 updateInputLabel();
@@ -350,6 +393,9 @@ public class Calculator {
         this.three.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (isResult) {
+                    clear();
+                }
                 input.add("3");
                 operatorCount = 0;
                 updateInputLabel();
@@ -368,14 +414,8 @@ public class Calculator {
             public void actionPerformed(ActionEvent e) {
                 removeOperatorDuplicate();
                 if (isResult) {
-                    input.clear();
-                    inputLabel.setText("");
+                    clear();
                     input.add(String.valueOf(result));
-                    output = new ArrayList<>();
-                    outputLabel.setText("");
-                    operatorCount = 0;
-                    lockDecimal = false;
-                    isResult = false;
                 }
                 input.add("+");
                 lockDecimal = false;
@@ -412,6 +452,9 @@ public class Calculator {
         this.zero.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (isResult) {
+                    clear();
+                }
                 input.add("0");
                 operatorCount = 0;
                 updateInputLabel();
@@ -438,6 +481,20 @@ public class Calculator {
         this.frame.setResizable(false);
         this.frame.setVisible(true);
         this.frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+
+    /**
+     * resets the variables in case of CA or after an
+     * equation result a number is entered
+     */
+    private void clear() {
+        this.input.clear();
+        this.output.clear();
+        this.inputLabel.setText("");
+        this.outputLabel.setText("");
+        this.operatorCount = 0;
+        this.lockDecimal = false;
+        this.isResult = false;
     }
 
     /**
@@ -537,6 +594,7 @@ public class Calculator {
      * short-circuiting the equation and displays NaN
      */
     private void evaluate() {
+        addEquationToHistory();
         StringBuilder sb = new StringBuilder();
         double num;
         int size = getLastIndexOfInput();
@@ -630,5 +688,27 @@ public class Calculator {
         }
         outputLabel.setText(String.valueOf(this.result));
         isResult = true;
+        addResultToHistory();
+    }
+
+    private void addEquationToHistory() {
+        try {
+            int count = 0;
+            for(String str : this.input) {
+                this.historyFile.write(str);
+                count++;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void addResultToHistory() {
+        try {
+            this.historyFile.write("=\n");
+            this.historyFile.write(String.valueOf(this.result) + "\n");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
