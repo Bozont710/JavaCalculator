@@ -50,8 +50,22 @@ public class Calculator {
      */
     private double result;
     private boolean isResult = false;
+
+    /**
+     * showHistory is a toggle button to show the
+     * previous equations, the index signals the starting
+     * point to the history array so nothing gets displayed
+     * twice, the buttons and labels are self-explanatory
+     */
     private int width, height;
     private boolean showHistory = false;
+    private ArrayList<String> historyArray;
+    private int index = 0;
+    private JButton historyBtn1, historyBtn2, historyBtn3,
+            historyBtn4, historyBtn5, historyBtn6;
+    private JLabel historyLbl1, historyLbl2, historyLbl3,
+            historyLbl4, historyLbl5, historyLbl6;
+    //    private JScrollPane scrollPane;
 
     /**
      * After calling the constructor just run the program,
@@ -60,6 +74,7 @@ public class Calculator {
     Calculator() {
         this.input = new ArrayList<>();
         this.output = new ArrayList<>();
+        this.historyArray = new ArrayList<>();
 
         this.frame = new JFrame("Calculator");
         this.width = 494;
@@ -69,6 +84,14 @@ public class Calculator {
         this.frame.getContentPane().setBackground(new Color(0,0,0));
         this.inputLabel = new JLabel();
         this.outputLabel = new JLabel();
+
+
+//        this.scrollPane = new JScrollPane();
+//        this.scrollPane.setBackground(new Color(100,0,0));
+//        this.scrollPane.setBounds(480,0,490,600);
+//        this.scrollPane.setLayout(new ScrollPaneLayout());
+//        this.scrollPane.setBorder(null);
+//        this.scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
         this.one = new JButton("1");
         this.two = new JButton("2");
@@ -89,6 +112,181 @@ public class Calculator {
         this.delete = new JButton("DEL");
         this.clear = new JButton("CA");
         this.history = new JButton("HIST");
+
+        this.historyBtn1 = new JButton();
+        this.historyBtn1.setBounds(480,550,480,50);
+        this.historyBtn1.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
+        this.historyBtn1.setForeground(new Color(255,255,255));
+        this.historyBtn1.setBackground(new Color(0,0,0));
+        this.historyBtn1.setHorizontalAlignment(SwingConstants.RIGHT);
+        this.historyBtn1.setBorder(null);
+        this.historyBtn1.setFocusable(false);
+        this.frame.add(this.historyBtn1);
+        this.historyBtn1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (isResult) {
+                    clear();
+                    input.add(historyBtn1.getText());
+                    inputLabel.setText(historyBtn1.getText());
+                }
+            }
+        });
+
+        this.historyBtn2 = new JButton();
+        this.historyBtn2.setBounds(480,450,480,50);
+        this.historyBtn2.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
+        this.historyBtn2.setForeground(new Color(255,255,255));
+        this.historyBtn2.setBackground(new Color(0,0,0));
+        this.historyBtn2.setHorizontalAlignment(SwingConstants.RIGHT);
+        this.historyBtn2.setBorder(null);
+        this.historyBtn2.setFocusable(false);
+        this.frame.add(this.historyBtn2);
+        this.historyBtn2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (isResult) {
+                    clear();
+                    input.add(historyBtn2.getText());
+                    inputLabel.setText(historyBtn2.getText());
+                }
+            }
+        });
+
+        this.historyBtn3 = new JButton();
+        this.historyBtn3.setBounds(480,350,480,50);
+        this.historyBtn3.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
+        this.historyBtn3.setForeground(new Color(255,255,255));
+        this.historyBtn3.setBackground(new Color(0,0,0));
+        this.historyBtn3.setHorizontalAlignment(SwingConstants.RIGHT);
+        this.historyBtn3.setBorder(null);
+        this.historyBtn3.setFocusable(false);
+        this.frame.add(this.historyBtn3);
+        this.historyBtn3.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (isResult) {
+                    clear();
+                    input.add(historyBtn3.getText());
+                    inputLabel.setText(historyBtn3.getText());
+                }
+            }
+        });
+
+        this.historyBtn4 = new JButton();
+        this.historyBtn4.setBounds(480,250,480,50);
+        this.historyBtn4.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
+        this.historyBtn4.setForeground(new Color(255,255,255));
+        this.historyBtn4.setBackground(new Color(0,0,0));
+        this.historyBtn4.setHorizontalAlignment(SwingConstants.RIGHT);
+        this.historyBtn4.setBorder(null);
+        this.historyBtn4.setFocusable(false);
+        this.frame.add(this.historyBtn4);
+        this.historyBtn4.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (isResult) {
+                    clear();
+                    input.add(historyBtn4.getText());
+                    inputLabel.setText(historyBtn4.getText());
+                }
+            }
+        });
+
+        this.historyBtn5 = new JButton();
+        this.historyBtn5.setBounds(480,150,480,50);
+        this.historyBtn5.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
+        this.historyBtn5.setForeground(new Color(255,255,255));
+        this.historyBtn5.setBackground(new Color(0,0,0));
+        this.historyBtn5.setHorizontalAlignment(SwingConstants.RIGHT);
+        this.historyBtn5.setBorder(null);
+        this.historyBtn5.setFocusable(false);
+        this.frame.add(this.historyBtn5);
+        this.historyBtn5.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (isResult) {
+                    clear();
+                    input.add(historyBtn5.getText());
+                    inputLabel.setText(historyBtn5.getText());
+                }
+            }
+        });
+
+        this.historyBtn6 = new JButton();
+        this.historyBtn6.setBounds(480,50,480,50);
+        this.historyBtn6.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
+        this.historyBtn6.setForeground(new Color(255,255,255));
+        this.historyBtn6.setBackground(new Color(0,0,0));
+        this.historyBtn6.setHorizontalAlignment(SwingConstants.RIGHT);
+        this.historyBtn6.setBorder(null);
+        this.historyBtn6.setFocusable(false);
+        this.frame.add(this.historyBtn6);
+        this.historyBtn6.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (isResult) {
+                    clear();
+                    input.add(historyBtn6.getText());
+                    inputLabel.setText(historyBtn6.getText());
+                }
+            }
+        });
+
+        this.historyLbl1 = new JLabel();
+        this.historyLbl1.setBounds(480,500,480,50);
+        this.historyLbl1.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
+        this.historyLbl1.setForeground(new Color(255,255,255));
+        this.historyLbl1.setHorizontalAlignment(SwingConstants.RIGHT);
+        this.historyLbl1.setBorder(null);
+        this.historyLbl1.setFocusable(false);
+        this.frame.add(this.historyLbl1);
+        this.historyLbl1.setText("Hello");
+
+        this.historyLbl2 = new JLabel();
+        this.historyLbl2.setBounds(480,400,480,50);
+        this.historyLbl2.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
+        this.historyLbl2.setForeground(new Color(255,255,255));
+        this.historyLbl2.setHorizontalAlignment(SwingConstants.RIGHT);
+        this.historyLbl2.setBorder(null);
+        this.historyLbl2.setFocusable(false);
+        this.frame.add(this.historyLbl2);
+
+        this.historyLbl3 = new JLabel();
+        this.historyLbl3.setBounds(480,300,480,50);
+        this.historyLbl3.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
+        this.historyLbl3.setForeground(new Color(255,255,255));
+        this.historyLbl3.setHorizontalAlignment(SwingConstants.RIGHT);
+        this.historyLbl3.setBorder(null);
+        this.historyLbl3.setFocusable(false);
+        this.frame.add(this.historyLbl3);
+
+        this.historyLbl4 = new JLabel();
+        this.historyLbl4.setBounds(480,200,480,50);
+        this.historyLbl4.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
+        this.historyLbl4.setForeground(new Color(255,255,255));
+        this.historyLbl4.setHorizontalAlignment(SwingConstants.RIGHT);
+        this.historyLbl4.setBorder(null);
+        this.historyLbl4.setFocusable(false);
+        this.frame.add(this.historyLbl4);
+
+        this.historyLbl5 = new JLabel();
+        this.historyLbl5.setBounds(480,100,480,50);
+        this.historyLbl5.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
+        this.historyLbl5.setForeground(new Color(255,255,255));
+        this.historyLbl5.setHorizontalAlignment(SwingConstants.RIGHT);
+        this.historyLbl5.setBorder(null);
+        this.historyLbl5.setFocusable(false);
+        this.frame.add(this.historyLbl5);
+
+        this.historyLbl6 = new JLabel();
+        this.historyLbl6.setBounds(480,0,480,50);
+        this.historyLbl6.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
+        this.historyLbl6.setForeground(new Color(255,255,255));
+        this.historyLbl6.setHorizontalAlignment(SwingConstants.RIGHT);
+        this.historyLbl6.setBorder(null);
+        this.historyLbl6.setFocusable(false);
+        this.frame.add(this.historyLbl6);
 
 
         this.inputLabel.setBounds(0,0,480,50);
@@ -468,6 +666,9 @@ public class Calculator {
         });
 
 
+
+//        this.frame.getContentPane().add(this.scrollPane);
+//        this.scrollPane.setVisible(true);
         this.frame.setResizable(false);
         this.frame.setVisible(true);
         this.frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -584,7 +785,6 @@ public class Calculator {
      * short-circuiting the equation and displays NaN
      */
     private void evaluate() {
-        addEquationToHistory();
         StringBuilder sb = new StringBuilder();
         double num;
         int size = getLastIndexOfInput();
@@ -678,19 +878,104 @@ public class Calculator {
         }
         outputLabel.setText(String.valueOf(this.result));
         isResult = true;
-        addResultToHistory();
+        addToHistory();
         displayHistory();
     }
 
+    /**
+     * Displays the history, the result is a button,
+     * when clicked it starts a new equation starting
+     * with it, also resets the history array so the
+     * history is limited but still better than nothing.
+     * I tried doing it differently, for now
+     * this will do
+     */
     private void displayHistory() {
-        // TODO
+        if (this.historyArray.size() > 12) {
+            this.index = 0;
+            this.historyBtn1.setText(this.historyArray.get(13));
+            this.historyLbl1.setText(this.historyArray.get(12));
+            this.historyArray.clear();
+        }
+        for (int i = this.index; i < this.historyArray.size(); i += 2) {
+            switch (i) {
+                case 0:
+                    this.historyBtn1.setText(this.historyArray.get(i+1));
+                    this.historyLbl1.setText(this.historyArray.get(i));
+                    break;
+                case 2:
+                    this.historyBtn2.setText(this.historyArray.get(i+1));
+                    this.historyLbl2.setText(this.historyArray.get(i));
+                    break;
+                case 4:
+                    this.historyBtn3.setText(this.historyArray.get(i+1));
+                    this.historyLbl3.setText(this.historyArray.get(i));
+                    break;
+                case 6:
+                    this.historyBtn4.setText(this.historyArray.get(i+1));
+                    this.historyLbl4.setText(this.historyArray.get(i));
+                    break;
+                case 8:
+                    this.historyBtn5.setText(this.historyArray.get(i+1));
+                    this.historyLbl5.setText(this.historyArray.get(i));
+                    break;
+                case 10:
+                    this.historyBtn6.setText(this.historyArray.get(i+1));
+                    this.historyLbl6.setText(this.historyArray.get(i));
+                    break;
+            }
+            this.index += 2;
+        }
     }
 
-    private void addEquationToHistory() {
-        // TODO
-    }
+//    private void displayHistory2() {
+//        int n = 50;
+//        for (int i = 0; i < this.historyArray.size(); i += 2) {
+//            JButton res = new JButton(this.historyArray.get(i+1));
+//            res.setBounds(0,this.historyY,480,50);
+//            res.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
+//            res.setForeground(new Color(255,255,255));
+//            res.setBackground(new Color(0,0,0));
+//            res.setHorizontalAlignment(SwingConstants.RIGHT);
+//            res.setBorder(null);
+//            res.setFocusable(false);
+////            this.scrollPane.add(res);
+//            res.addActionListener(new ActionListener() {
+//                @Override
+//                public void actionPerformed(ActionEvent e) {
+//                    if (isResult) {
+//                        clear();
+//                        input.add(res.getText());
+//                        inputLabel.setText(res.getText());
+//                    }
+//                }
+//            });
+//
+//            this.historyY -= n;
+//            JLabel equation = new JLabel(this.historyArray.get(i));
+//            System.out.println(this.historyArray.get(i));
+//            equation.setBounds(0,this.historyY,480,50);
+//            equation.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
+//            equation.setForeground(new Color(255,255,255));
+//            equation.setHorizontalAlignment(SwingConstants.RIGHT);
+//            equation.setBorder(null);
+//            equation.setFocusable(false);
+////            this.scrollPane.add(equation);
+//            this.historyY -= n;
+//        }
+//        this.historyArray.clear();
+//    }
 
-    private void addResultToHistory() {
-        // TODO
+    /**
+     * appends the equation and the result to the
+     * history array
+     */
+    private void addToHistory() {
+        StringBuilder sb = new StringBuilder();
+        for (String str : this.input) {
+            sb.append(str);
+        }
+        this.historyArray.add(sb + "=");
+        this.historyArray.add(String.valueOf(this.result));
     }
 }
