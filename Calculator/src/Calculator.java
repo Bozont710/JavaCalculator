@@ -14,6 +14,9 @@ public class Calculator {
      */
     private ArrayList<String> input;
     private ArrayList<Double> output;
+    /**
+     * Labels, the Frame and Buttons, self-explanatory
+     */
     private JLabel inputLabel, outputLabel;
     private JFrame frame;
     private JButton one, two, three, four,
@@ -138,7 +141,6 @@ public class Calculator {
             @Override
             public void actionPerformed(ActionEvent e) {
                 removeOperatorDuplicate();
-                removeOperatorDuplicate();
                 if (isResult) {
                     input.clear();
                     inputLabel.setText("");
@@ -214,7 +216,6 @@ public class Calculator {
         this.multiplication.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                removeOperatorDuplicate();
                 removeOperatorDuplicate();
                 if (isResult) {
                     input.clear();
@@ -366,7 +367,6 @@ public class Calculator {
             @Override
             public void actionPerformed(ActionEvent e) {
                 removeOperatorDuplicate();
-                removeOperatorDuplicate();
                 if (isResult) {
                     input.clear();
                     inputLabel.setText("");
@@ -428,7 +428,7 @@ public class Calculator {
         this.equals.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                evaluate(input);
+                evaluate();
                 calculate();
                 lockDecimal = false;
             }
@@ -441,11 +441,11 @@ public class Calculator {
     }
 
     /**
-     * Retrieves the last element of the input ArrayList
-     * @param index the index of the last element, size-1
-     * @return The last element as a String
+     * Retrieves an element of the input ArrayList
+     * @param index the index of the element to retrieve
+     * @return The element as a String
      */
-    private String getLastElementFromInput(int index) {
+    private String getElementFromInput(int index) {
         return this.input.get(index);
     }
 
@@ -467,21 +467,21 @@ public class Calculator {
     private void dealWithMinus() {
         int lastElementIndex = getLastIndexOfInput();
         if (operatorCount == 2) {
-            this.input.remove(lastElementIndex-1);
-            this.operatorCount--;
             lastElementIndex--;
+            this.input.remove(lastElementIndex);
+            this.operatorCount--;
         }
 
-        if ("-".equals(getLastElementFromInput(lastElementIndex))) {
+        if ("-".equals(getElementFromInput(lastElementIndex))) {
             removeOperatorDuplicate();
             this.input.add("+");
             this.operatorCount++;
-        } else if (operatorCount == 0 || operatorCount == 1) {
+        } else {
             this.input.add("-");
             this.operatorCount++;
         }
-
     }
+
 
     /**
      * Deals with duplicate operators, simply removes the last operator
@@ -490,9 +490,10 @@ public class Calculator {
      */
     private void removeOperatorDuplicate() {
         int lastElementIndex = getLastIndexOfInput();
-        if (this.OPERATORS.contains(getLastElementFromInput(lastElementIndex))) {
+        while (this.OPERATORS.contains(getElementFromInput(lastElementIndex))) {
             this.input.remove(lastElementIndex);
             this.operatorCount--;
+            lastElementIndex--;
         }
     }
 
@@ -502,10 +503,10 @@ public class Calculator {
      */
     private void deleteLastElement() {
         int index = getLastIndexOfInput();
-        if (OPERATORS.contains(getLastElementFromInput(index))) {
+        if (OPERATORS.contains(getElementFromInput(index))) {
             this.operatorCount--;
         }
-        if (".".equals(getLastElementFromInput(index))) {
+        if (".".equals(getElementFromInput(index))) {
             this.lockDecimal = false;
         }
         this.input.remove(index);
@@ -532,16 +533,16 @@ public class Calculator {
      * * is replaced by null and / is converted to * since 5/5 is
      * 5 * 1/5, resulting in an Array List that only contains
      * positive and negative numbers, and also doubles, and null
-     * signifies multiplication, division by zero results in short
-     * circuiting the equation and displays NaN
-     * @param inp the input Array List
+     * signifies multiplication, division by zero results in
+     * short-circuiting the equation and displays NaN
      */
-    private void evaluate(ArrayList<String> inp) {
+    private void evaluate() {
         StringBuilder sb = new StringBuilder();
         double num;
-        for (int i = 0; i < inp.size(); i++) {
-            if (this.OPERATORS.contains(inp.get(i))) {
-                if ("/".equals(inp.get(i))) {
+        int size = getLastIndexOfInput();
+        for (int i = 0; i <= size; i++) {
+            if (this.OPERATORS.contains(getElementFromInput(i))) {
+                if ("/".equals(getElementFromInput(i))) {
                     num = checkFormat(sb.toString());
                     if (this.outputLabel.getText().equals("NaN")) {
                         break;
@@ -550,12 +551,14 @@ public class Calculator {
                     this.output.add(null);
                     sb.delete(0, sb.capacity());
                     this.isDivision = true;
-                } else if ("-".equals(inp.get(i))) {
-                    num = checkFormat(sb.toString());
-                    this.output.add(num);
-                    sb.delete(0, sb.capacity());
+                } else if ("-".equals(getElementFromInput(i))) {
+                    if (!sb.isEmpty()) {
+                        num = checkFormat(sb.toString());
+                        this.output.add(num);
+                        sb.delete(0, sb.capacity());
+                    }
                     this.isNegative = true;
-                } else if ("*".equals(inp.get(i))) {
+                } else if ("*".equals(getElementFromInput(i))) {
                     num = checkFormat(sb.toString());
                     this.output.add(num);
                     this.output.add(null);
@@ -566,7 +569,7 @@ public class Calculator {
                     sb.delete(0, sb.capacity());
                 }
             } else {
-                sb.append(inp.get(i));
+                sb.append(getElementFromInput(i));
             }
         }
         num = checkFormat(sb.toString());
