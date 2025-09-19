@@ -1,10 +1,7 @@
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -55,7 +52,6 @@ public class Calculator {
     private boolean isResult = false;
     private int width, height;
     private boolean showHistory = false;
-    private FileWriter historyFile;
 
     /**
      * After calling the constructor just run the program,
@@ -64,12 +60,6 @@ public class Calculator {
     Calculator() {
         this.input = new ArrayList<>();
         this.output = new ArrayList<>();
-        try {
-            this.historyFile = new FileWriter("history.txt");
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
 
         this.frame = new JFrame("Calculator");
         this.width = 494;
@@ -689,26 +679,18 @@ public class Calculator {
         outputLabel.setText(String.valueOf(this.result));
         isResult = true;
         addResultToHistory();
+        displayHistory();
+    }
+
+    private void displayHistory() {
+        // TODO
     }
 
     private void addEquationToHistory() {
-        try {
-            int count = 0;
-            for(String str : this.input) {
-                this.historyFile.write(str);
-                count++;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        // TODO
     }
 
     private void addResultToHistory() {
-        try {
-            this.historyFile.write("=\n");
-            this.historyFile.write(String.valueOf(this.result) + "\n");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        // TODO
     }
 }
