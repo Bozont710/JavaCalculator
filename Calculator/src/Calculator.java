@@ -1,677 +1,331 @@
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
 public class Calculator {
     /**
-     * the input Array List stores every button push, the output
-     * is made of doubles and nulls, explained below
+     * frame for the app, panel houses the calculator panel and
+     * the scrollPane both, scrollPane houses the history panel
      */
-    private ArrayList<String> input;
+    private JFrame frame;
+    private JPanel calculatorPanel, historyPanel, panel;
+    private JScrollPane scrollPane;
+    /**
+     * storage for input, output and history, self-explanatory
+     */
+    private ArrayList<String> input, history;
     private ArrayList<Double> output;
     /**
-     * Labels, the Frame and Buttons, self-explanatory
+     * the button labels for automation, and one JLabel and one
+     * JButton for simpler implementation
      */
-    private JLabel inputLabel, outputLabel;
-    private JFrame frame;
-    private JButton one, two, three, four,
-            five, six, seven, eight, nine,
-            zero, decimal, addition, division,
-            multiplication, subtraction, equals,
-            delete, clear, history;
+    private String[] labels = {"CA", "DEL", "HIST", "/",
+            "7", "8", "9", "*", "4", "5", "6", "-", "1",
+            "2", "3", "+", ".", "0", "="};
+    private JLabel label;
+    private JButton button;
     /**
-     * This was the quickest way I could think of to use a Set
-     * for quick access to operators
+     * the operators, self-explanatory
      */
-    private final String[] ELEMENTS = {"/", "*", "+", "-"};
+    private final String[] ELEMENTS = {"*", "/", "+", "-"};
     private final HashSet<String> OPERATORS = new HashSet<>(Arrays.asList(ELEMENTS));
     /**
-     * isDivision and isNegative helps reduce the calculations
+     * few booleans to check what to display, lock or what arithmetic
+     * operation to perform
      */
-    private boolean isDivision = false, isNegative = false;
+    private boolean isDivision = false, isNegative = false,
+            lockDecimal = false, isResult = false, showHistory = false;
     /**
-     * the operator count makes sure there are no more than 2 operators
-     * at any time, at which the second one has to be a negative
-     * indicator. the decimal lock, locks the decimal until an
-     * operator is used, or CA is pressed or a decimal is deleted
+     * operator count is responsible so only at most two operators are
+     * present after each other in which case the second has to be a
+     * negative indicator, n is for the Layout manager, it's complex
+     * lets leave it at that
      */
-    private int operatorCount = 0;
-    private boolean lockDecimal = false;
+    private int operatorCount = 0, x = 0, y = 0;
+    private final int n = 600;
     /**
-     * result displays the result of the equation and
-     * isResult checks if there was a result of a
-     * previous equation at which pressing an operator
-     * immediately after the equals sign, starts the
-     * equation with the previous result
+     * stores the result of an operation
      */
     private double result;
-    private boolean isResult = false;
-
     /**
-     * showHistory is a toggle button to show the
-     * previous equations, the index signals the starting
-     * point to the history array so nothing gets displayed
-     * twice, the buttons and labels are self-explanatory
+     * stuff to make things not too ugly, but ugly enough to
+     * be obvious that I'm not a front end specialist
      */
-    private int width, height;
-    private boolean showHistory = false;
-    private ArrayList<String> historyArray;
-    private int index = 0;
-    private JButton historyBtn1, historyBtn2, historyBtn3,
-            historyBtn4, historyBtn5, historyBtn6;
-    private JLabel historyLbl1, historyLbl2, historyLbl3,
-            historyLbl4, historyLbl5, historyLbl6;
-    //    private JScrollPane scrollPane;
+    private Font font;
+    private Color orange, yellow, gray;
+    private MatteBorder orangeBorder, yellowBorder, grayBorder;
+    /**
+     * the quite complex layout manager mentioned above, works well
+     * when you know what you are doing which I don't
+     */
+    private GridBagLayout layout;
+    private GridBagConstraints constraints;
 
     /**
-     * After calling the constructor just run the program,
-     * the calculator will pop up in a fixed window
+     * simple calculator, after an operation pressing an operator
+     * the previous result will be placed before the operator, the
+     * HIST button shows the history in which you can press any
+     * previous result, and it will append the result to the current
+     * operation if the last element is an operator otherwise starts
+     * a new operation with the result as the first element
      */
     Calculator() {
         this.input = new ArrayList<>();
         this.output = new ArrayList<>();
-        this.historyArray = new ArrayList<>();
+        this.history = new ArrayList<>();
 
         this.frame = new JFrame("Calculator");
-        this.width = 494;
-        this.height = 637;
-        this.frame.setSize(this.width, this.height);
-        this.frame.getContentPane().setLayout(null);
-        this.frame.getContentPane().setBackground(new Color(0,0,0));
-        this.inputLabel = new JLabel();
-        this.outputLabel = new JLabel();
+        this.frame.setSize(500, 650);
+        this.font = new Font(Font.DIALOG, Font.BOLD, 20);
+
+        this.orange = new Color(255, 106, 0);
+        this.orangeBorder = new MatteBorder(4, 4, 4, 4, new Color(245, 96, 9));
+        this.yellow = new Color(255, 183, 0);
+        this.yellowBorder = new MatteBorder(4, 4, 4, 4, new Color(245, 173, 9));
+        this.gray = new Color(181, 181, 181);
+        this.grayBorder = new MatteBorder(4, 4, 4, 4, new Color(171, 171, 171));
+
+        this.panel = new JPanel();
+        this.panel.setSize(1000, 650);
+        this.panel.setBackground(Color.BLACK);
+
+        this.calculatorPanel = new JPanel();
+        this.calculatorPanel.setBackground(Color.BLACK);
+        this.calculatorPanel.setSize(500, 650);
+
+        this.historyPanel = new JPanel();
+        this.historyPanel.setBackground(Color.BLACK);
+        this.historyPanel.setSize(500, 650);
+
+        this.layout = new GridBagLayout();
+        this.constraints = new GridBagConstraints();
+
+        this.calculatorPanel.setLayout(this.layout);
+
+        this.scrollPane = new JScrollPane(this.historyPanel);
+        this.scrollPane.setBorder(null);
+        this.scrollPane.setPreferredSize(new Dimension(500, 650));
 
 
-//        this.scrollPane = new JScrollPane();
-//        this.scrollPane.setBackground(new Color(100,0,0));
-//        this.scrollPane.setBounds(480,0,490,600);
-//        this.scrollPane.setLayout(new ScrollPaneLayout());
-//        this.scrollPane.setBorder(null);
-//        this.scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        initCalculator();
+        colorButtons();
 
-        this.one = new JButton("1");
-        this.two = new JButton("2");
-        this.three = new JButton("3");
-        this.four = new JButton("4");
-        this.five = new JButton("5");
-        this.six = new JButton("6");
-        this.seven = new JButton("7");
-        this.eight = new JButton("8");
-        this.nine = new JButton("9");
-        this.zero = new JButton("0");
-        this.decimal = new JButton(".");
-        this.addition = new JButton("+");
-        this.subtraction = new JButton("-");
-        this.multiplication = new JButton("*");
-        this.division = new JButton("/");
-        this.equals = new JButton("=");
-        this.delete = new JButton("DEL");
-        this.clear = new JButton("CA");
-        this.history = new JButton("HIST");
 
-        this.historyBtn1 = new JButton();
-        this.historyBtn1.setBounds(480,550,480,50);
-        this.historyBtn1.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.historyBtn1.setForeground(new Color(255,255,255));
-        this.historyBtn1.setBackground(new Color(0,0,0));
-        this.historyBtn1.setHorizontalAlignment(SwingConstants.RIGHT);
-        this.historyBtn1.setBorder(null);
-        this.historyBtn1.setFocusable(false);
-        this.frame.add(this.historyBtn1);
-        this.historyBtn1.addActionListener(new ActionListener() {
+        this.historyPanel.setLayout(new BoxLayout(this.historyPanel, BoxLayout.PAGE_AXIS));
+        this.historyPanel.setBorder(new MatteBorder(10, 10, 10, 10, Color.BLACK));
+
+        this.panel.setLayout(new BoxLayout(this.panel, BoxLayout.LINE_AXIS));
+
+        this.panel.add(calculatorPanel);
+        this.panel.add(scrollPane);
+
+        this.frame.getContentPane().add(panel);
+        this.frame.setVisible(true);
+        this.frame.setResizable(false);
+        this.frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+
+    /**
+     * places the input and output labels in the calculator, after
+     * that it places the buttons in their corresponding space
+     */
+    private void initCalculator() {
+        createLabel();
+        this.y += this.n;
+        createLabel();
+        this.y += this.n;
+        int count = 0;
+        for (int i = 0; i < this.labels.length; i++) {
+            createButton(this.labels[i]);
+            this.x += this.n;
+            count++;
+            if (count == 4) {
+                this.x = 0;
+                this.y += this.n;
+                count = 0;
+            }
+        }
+    }
+
+    /**
+     * puts colors and borders on initialized buttons
+     */
+    private void colorButtons() {
+        String lbl;
+        for (int i = 2; i < 21; i++) {
+            this.button = (JButton) this.calculatorPanel.getComponent(i);
+            lbl = this.button.getText();
+            switch(lbl) {
+                case "1":
+                case "2":
+                case "3":
+                case "4":
+                case "5":
+                case "6":
+                case "7":
+                case "8":
+                case "9":
+                case "0":
+                    this.button.setBackground(this.gray);
+                    this.button.setBorder(this.grayBorder);
+                    break;
+                case "+":
+                case "-":
+                case "*":
+                case "/":
+                    this.button.setBackground(this.yellow);
+                    this.button.setBorder(this.yellowBorder);
+                    break;
+                case ".":
+                    this.button.setBackground(new Color(161,161,161));
+                    this.button.setBorder(new MatteBorder(4,4,4,4, new Color(151,151,151)));
+                    break;
+                default:
+                    this.button.setBackground(this.orange);
+                    this.button.setBorder(this.orangeBorder);
+                    break;
+            }
+        }
+    }
+
+    /**
+     * responsible for creating the input and output labels,
+     * when "nothing" is displayed in reality it's the text
+     * "TEXT" in black so it doesn't show up, it was the simplest
+     * way to stop the calculator from collapsing since an empty
+     * string disturbs the space and everything gets pressed together
+     */
+    private void createLabel() {
+        this.label = new JLabel("TEXT");
+        this.label.setFont(this.font);
+        this.label.setForeground(Color.BLACK);
+        this.label.setHorizontalAlignment(SwingConstants.CENTER);
+        this.constraints.gridx = this.x;
+        this.constraints.gridy = this.y;
+        this.constraints.gridwidth = 2000;
+        this.constraints.gridheight = 300;
+        this.constraints.ipadx = 82;
+        this.constraints.ipady = 56;
+        this.constraints.fill = GridBagConstraints.HORIZONTAL;
+
+
+        this.layout.setConstraints(this.label, this.constraints);
+        this.calculatorPanel.add(this.label);
+    }
+
+    /**
+     * responsible for creating a button and setting it's display
+     * to the passed string, also calls a method when pressed, at
+     * which point their text is sent to the method
+     * @param text the text to display
+     */
+    private void createButton(String text) {
+        this.button = new JButton(text);
+        this.button.setFont(this.font);
+        this.button.setFocusPainted(false);
+        if (text.equals("=")) {
+            this.constraints.gridwidth = 1000;
+        } else {
+            this.constraints.gridwidth = 125;
+        }
+        this.constraints.gridheight = 125;
+        this.constraints.ipadx = 82;
+        this.constraints.ipady = 56;
+        this.constraints.gridx = this.x;
+        this.constraints.gridy = this.y;
+        this.constraints.fill = GridBagConstraints.HORIZONTAL;
+        this.button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (isResult) {
+                dealWithButtons(e.getActionCommand());
+            }
+        });
+
+        this.layout.setConstraints(this.button, this.constraints);
+        this.calculatorPanel.add(this.button);
+    }
+
+    /**
+     * defines which buttons do what, some buttons do the same,
+     * so I made them fall through
+     * @param str the displayed string of the pressed button
+     */
+    private void dealWithButtons(String str) {
+        switch(str) {
+            case "1":
+            case "2":
+            case "3":
+            case "4":
+            case "5":
+            case "6":
+            case "7":
+            case "8":
+            case "9":
+            case "0":
+                if (this.isResult) {
                     clear();
-                    input.add(historyBtn1.getText());
-                    inputLabel.setText(historyBtn1.getText());
                 }
-            }
-        });
-
-        this.historyBtn2 = new JButton();
-        this.historyBtn2.setBounds(480,450,480,50);
-        this.historyBtn2.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.historyBtn2.setForeground(new Color(255,255,255));
-        this.historyBtn2.setBackground(new Color(0,0,0));
-        this.historyBtn2.setHorizontalAlignment(SwingConstants.RIGHT);
-        this.historyBtn2.setBorder(null);
-        this.historyBtn2.setFocusable(false);
-        this.frame.add(this.historyBtn2);
-        this.historyBtn2.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isResult) {
-                    clear();
-                    input.add(historyBtn2.getText());
-                    inputLabel.setText(historyBtn2.getText());
-                }
-            }
-        });
-
-        this.historyBtn3 = new JButton();
-        this.historyBtn3.setBounds(480,350,480,50);
-        this.historyBtn3.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.historyBtn3.setForeground(new Color(255,255,255));
-        this.historyBtn3.setBackground(new Color(0,0,0));
-        this.historyBtn3.setHorizontalAlignment(SwingConstants.RIGHT);
-        this.historyBtn3.setBorder(null);
-        this.historyBtn3.setFocusable(false);
-        this.frame.add(this.historyBtn3);
-        this.historyBtn3.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isResult) {
-                    clear();
-                    input.add(historyBtn3.getText());
-                    inputLabel.setText(historyBtn3.getText());
-                }
-            }
-        });
-
-        this.historyBtn4 = new JButton();
-        this.historyBtn4.setBounds(480,250,480,50);
-        this.historyBtn4.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.historyBtn4.setForeground(new Color(255,255,255));
-        this.historyBtn4.setBackground(new Color(0,0,0));
-        this.historyBtn4.setHorizontalAlignment(SwingConstants.RIGHT);
-        this.historyBtn4.setBorder(null);
-        this.historyBtn4.setFocusable(false);
-        this.frame.add(this.historyBtn4);
-        this.historyBtn4.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isResult) {
-                    clear();
-                    input.add(historyBtn4.getText());
-                    inputLabel.setText(historyBtn4.getText());
-                }
-            }
-        });
-
-        this.historyBtn5 = new JButton();
-        this.historyBtn5.setBounds(480,150,480,50);
-        this.historyBtn5.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.historyBtn5.setForeground(new Color(255,255,255));
-        this.historyBtn5.setBackground(new Color(0,0,0));
-        this.historyBtn5.setHorizontalAlignment(SwingConstants.RIGHT);
-        this.historyBtn5.setBorder(null);
-        this.historyBtn5.setFocusable(false);
-        this.frame.add(this.historyBtn5);
-        this.historyBtn5.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isResult) {
-                    clear();
-                    input.add(historyBtn5.getText());
-                    inputLabel.setText(historyBtn5.getText());
-                }
-            }
-        });
-
-        this.historyBtn6 = new JButton();
-        this.historyBtn6.setBounds(480,50,480,50);
-        this.historyBtn6.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.historyBtn6.setForeground(new Color(255,255,255));
-        this.historyBtn6.setBackground(new Color(0,0,0));
-        this.historyBtn6.setHorizontalAlignment(SwingConstants.RIGHT);
-        this.historyBtn6.setBorder(null);
-        this.historyBtn6.setFocusable(false);
-        this.frame.add(this.historyBtn6);
-        this.historyBtn6.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isResult) {
-                    clear();
-                    input.add(historyBtn6.getText());
-                    inputLabel.setText(historyBtn6.getText());
-                }
-            }
-        });
-
-        this.historyLbl1 = new JLabel();
-        this.historyLbl1.setBounds(480,500,480,50);
-        this.historyLbl1.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.historyLbl1.setForeground(new Color(255,255,255));
-        this.historyLbl1.setHorizontalAlignment(SwingConstants.RIGHT);
-        this.historyLbl1.setBorder(null);
-        this.historyLbl1.setFocusable(false);
-        this.frame.add(this.historyLbl1);
-        this.historyLbl1.setText("Hello");
-
-        this.historyLbl2 = new JLabel();
-        this.historyLbl2.setBounds(480,400,480,50);
-        this.historyLbl2.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.historyLbl2.setForeground(new Color(255,255,255));
-        this.historyLbl2.setHorizontalAlignment(SwingConstants.RIGHT);
-        this.historyLbl2.setBorder(null);
-        this.historyLbl2.setFocusable(false);
-        this.frame.add(this.historyLbl2);
-
-        this.historyLbl3 = new JLabel();
-        this.historyLbl3.setBounds(480,300,480,50);
-        this.historyLbl3.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.historyLbl3.setForeground(new Color(255,255,255));
-        this.historyLbl3.setHorizontalAlignment(SwingConstants.RIGHT);
-        this.historyLbl3.setBorder(null);
-        this.historyLbl3.setFocusable(false);
-        this.frame.add(this.historyLbl3);
-
-        this.historyLbl4 = new JLabel();
-        this.historyLbl4.setBounds(480,200,480,50);
-        this.historyLbl4.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.historyLbl4.setForeground(new Color(255,255,255));
-        this.historyLbl4.setHorizontalAlignment(SwingConstants.RIGHT);
-        this.historyLbl4.setBorder(null);
-        this.historyLbl4.setFocusable(false);
-        this.frame.add(this.historyLbl4);
-
-        this.historyLbl5 = new JLabel();
-        this.historyLbl5.setBounds(480,100,480,50);
-        this.historyLbl5.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.historyLbl5.setForeground(new Color(255,255,255));
-        this.historyLbl5.setHorizontalAlignment(SwingConstants.RIGHT);
-        this.historyLbl5.setBorder(null);
-        this.historyLbl5.setFocusable(false);
-        this.frame.add(this.historyLbl5);
-
-        this.historyLbl6 = new JLabel();
-        this.historyLbl6.setBounds(480,0,480,50);
-        this.historyLbl6.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.historyLbl6.setForeground(new Color(255,255,255));
-        this.historyLbl6.setHorizontalAlignment(SwingConstants.RIGHT);
-        this.historyLbl6.setBorder(null);
-        this.historyLbl6.setFocusable(false);
-        this.frame.add(this.historyLbl6);
-
-
-        this.inputLabel.setBounds(0,0,480,50);
-        this.inputLabel.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.inputLabel.setForeground(new Color(255,255,255));
-        this.inputLabel.setBorder(null);
-        this.inputLabel.setFocusable(false);
-        this.frame.add(this.inputLabel);
-
-        this.outputLabel.setBounds(0,50,480,50);
-        this.outputLabel.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.outputLabel.setForeground(new Color(255,255,255));
-        this.outputLabel.setBorder(null);
-        this.outputLabel.setFocusable(false);
-        this.frame.add(this.outputLabel);
-
-        this.clear.setBounds(0,100,120,100);
-        this.clear.setSelected(false);
-        this.clear.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.clear.setBackground(new Color(255,106,0));
-        this.clear.setBorder(new MatteBorder(4,4,4,4, new Color(245,96,0)));
-        this.clear.setFocusPainted(false);
-        this.frame.add(this.clear);
-        this.clear.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                clear();
-            }
-        });
-
-
-        this.delete.setBounds(120,100,120,100);
-        this.delete.setSelected(false);
-        this.delete.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.delete.setBackground(new Color(255,106,0));
-        this.delete.setBorder(new MatteBorder(4,4,4,4, new Color(245,96,0)));
-        this.delete.setFocusPainted(false);
-        this.frame.add(this.delete);
-        this.delete.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!input.isEmpty()) {
-                    deleteLastElement();
-                }
-            }
-        });
-
-        this.history.setBounds(240, 100, 120, 100);
-        this.history.setSelected(false);
-        this.history.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.history.setBackground(new Color(255,106,0));
-        this.history.setBorder(new MatteBorder(4,4,4,4, new Color(245,96,0)));
-        this.history.setFocusPainted(false);
-        this.frame.add(this.history);
-        this.history.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showHistory = !showHistory;
-                if (showHistory) {
-                    width *= 2;
-                    frame.setSize(width, height);
-                } else {
-                    width /= 2;
-                    frame.setSize(width, height);
-                }
-            }
-        });
-
-        this.division.setBounds(360, 100, 120, 100);
-        this.division.setSelected(false);
-        this.division.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.division.setBackground(new Color(255, 183, 0));
-        this.division.setBorder(new MatteBorder(4,4,4,4, new Color(245,173,0)));
-        this.division.setFocusPainted(false);
-        this.frame.add(this.division);
-        this.division.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+                this.input.add(str);
+                this.operatorCount = 0;
+                updateInputLabel();
+                break;
+            case "+":
+            case "/":
+            case "*":
                 removeOperatorDuplicate();
-                if (isResult) {
+                if (this.isResult) {
                     clear();
-                    input.add(String.valueOf(result));
+                    this.input.add(String.valueOf(this.result));
                 }
-                input.add("/");
-                lockDecimal = false;
-                operatorCount++;
+                this.input.add(str);
+                this.lockDecimal = false;
+                this.operatorCount++;
                 updateInputLabel();
-            }
-        });
-
-        this.seven.setBounds(0, 200, 120,100);
-        this.seven.setSelected(false);
-        this.seven.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.seven.setBackground(new Color(181,181,181));
-        this.seven.setBorder(new MatteBorder(4,4,4,4, new Color(171,171,171)));
-        this.seven.setFocusPainted(false);
-        this.frame.add(this.seven);
-        this.seven.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isResult) {
+                break;
+            case "-":
+                this.lockDecimal = false;
+                if (this.isResult) {
                     clear();
-                }
-                input.add("7");
-                operatorCount = 0;
-                updateInputLabel();
-            }
-        });
-
-        this.eight.setBounds(120,200,120,100);
-        this.eight.setSelected(false);
-        this.eight.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.eight.setBackground(new Color(181,181,181));
-        this.eight.setBorder(new MatteBorder(4,4,4,4, new Color(171,171,171)));
-        this.eight.setFocusPainted(false);
-        this.frame.add(this.eight);
-        this.eight.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isResult) {
-                    clear();
-                }
-                input.add("8");
-                operatorCount = 0;
-                updateInputLabel();
-            }
-        });
-
-        this.nine.setBounds(240,200,120,100);
-        this.nine.setSelected(false);
-        this.nine.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.nine.setBackground(new Color(181,181,181));
-        this.nine.setBorder(new MatteBorder(4,4,4,4, new Color(171,171,171)));
-        this.nine.setFocusPainted(false);
-        this.frame.add(this.nine);
-        this.nine.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isResult) {
-                    clear();
-                }
-                input.add("9");
-                operatorCount = 0;
-                updateInputLabel();
-            }
-        });
-
-        this.multiplication.setBounds(360,200,120,100);
-        this.multiplication.setSelected(false);
-        this.multiplication.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.multiplication.setBackground(new Color(255, 183, 0));
-        this.multiplication.setBorder(new MatteBorder(4,4,4,4, new Color(245,173,0)));
-        this.multiplication.setFocusPainted(false);
-        this.frame.add(this.multiplication);
-        this.multiplication.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                removeOperatorDuplicate();
-                if (isResult) {
-                    clear();
-                    input.add(String.valueOf(result));
-                }
-                input.add("*");
-                lockDecimal = false;
-                operatorCount++;
-                updateInputLabel();
-            }
-        });
-
-        this.four.setBounds(0, 300, 120,100);
-        this.four.setSelected(false);
-        this.four.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.four.setBackground(new Color(181,181,181));
-        this.four.setBorder(new MatteBorder(4,4,4,4, new Color(171,171,171)));
-        this.four.setFocusPainted(false);
-        this.frame.add(this.four);
-        this.four.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isResult) {
-                    clear();
-                }
-                input.add("4");
-                operatorCount = 0;
-                updateInputLabel();
-            }
-        });
-
-        this.five.setBounds(120,300,120,100);
-        this.five.setSelected(false);
-        this.five.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.five.setBackground(new Color(181,181,181));
-        this.five.setBorder(new MatteBorder(4,4,4,4, new Color(171,171,171)));
-        this.five.setFocusPainted(false);
-        this.frame.add(this.five);
-        this.five.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isResult) {
-                    clear();
-                }
-                input.add("5");
-                operatorCount = 0;
-                updateInputLabel();
-            }
-        });
-
-        this.six.setBounds(240, 300, 120,100);
-        this.six.setSelected(false);
-        this.six.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.six.setBackground(new Color(181,181,181));
-        this.six.setBorder(new MatteBorder(4,4,4,4, new Color(171,171,171)));
-        this.six.setFocusPainted(false);
-        this.frame.add(this.six);
-        this.six.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isResult) {
-                    clear();
-                }
-                input.add("6");
-                operatorCount = 0;
-                updateInputLabel();
-            }
-        });
-
-        this.subtraction.setBounds(360,300,120,100);
-        this.subtraction.setSelected(false);
-        this.subtraction.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.subtraction.setBackground(new Color(255, 183, 0));
-        this.subtraction.setBorder(new MatteBorder(4,4,4,4, new Color(245,173,0)));
-        this.subtraction.setFocusPainted(false);
-        this.frame.add(this.subtraction);
-        this.subtraction.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                lockDecimal = false;
-                if (isResult) {
-                    clear();
-                    input.add(String.valueOf(result));
+                    this.input.add(String.valueOf(this.result));
                 }
                 dealWithMinus();
                 updateInputLabel();
-            }
-        });
-
-        this.one.setBounds(0,400,120,100);
-        this.one.setSelected(false);
-        this.one.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.one.setBackground(new Color(181,181,181));
-        this.one.setBorder(new MatteBorder(4,4,4,4, new Color(171,171,171)));
-        this.one.setFocusPainted(false);
-        this.frame.add(this.one);
-        this.one.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isResult) {
-                    clear();
-                }
-                input.add("1");
-                operatorCount = 0;
-                updateInputLabel();
-            }
-        });
-
-        this.two.setBounds(120,400,120,100);
-        this.two.setSelected(false);
-        this.two.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.two.setBackground(new Color(181,181,181));
-        this.two.setBorder(new MatteBorder(4,4,4,4, new Color(171,171,171)));
-        this.two.setFocusPainted(false);
-        this.frame.add(this.two);
-        this.two.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isResult) {
-                    clear();
-                }
-                input.add("2");
-                operatorCount = 0;
-                updateInputLabel();
-            }
-        });
-
-        this.three.setBounds(240, 400, 120, 100);
-        this.three.setSelected(false);
-        this.three.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.three.setBackground(new Color(181,181,181));
-        this.three.setBorder(new MatteBorder(4,4,4,4, new Color(171,171,171)));
-        this.three.setFocusPainted(false);
-        this.frame.add(this.three);
-        this.three.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isResult) {
-                    clear();
-                }
-                input.add("3");
-                operatorCount = 0;
-                updateInputLabel();
-            }
-        });
-
-        this.addition.setBounds(360,400,120,100);
-        this.addition.setSelected(false);
-        this.addition.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.addition.setBackground(new Color(255, 183, 0));
-        this.addition.setBorder(new MatteBorder(4,4,4,4, new Color(245,173,0)));
-        this.addition.setFocusPainted(false);
-        this.frame.add(this.addition);
-        this.addition.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                removeOperatorDuplicate();
-                if (isResult) {
-                    clear();
-                    input.add(String.valueOf(result));
-                }
-                input.add("+");
-                lockDecimal = false;
-                operatorCount++;
-                updateInputLabel();
-            }
-        });
-
-        this.decimal.setBounds(0,500,120,100);
-        this.decimal.setSelected(false);
-        this.decimal.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.decimal.setBackground(new Color(161,161,161));
-        this.decimal.setBorder(new MatteBorder(4,4,4,4, new Color(151,151,151)));
-        this.decimal.setFocusPainted(false);
-        this.frame.add(this.decimal);
-        this.decimal.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!lockDecimal) {
+                break;
+            case ".":
+                if (!this.lockDecimal) {
                     input.add(".");
                 }
-                lockDecimal = true;
+                this.lockDecimal = true;
                 updateInputLabel();
-            }
-        });
-
-        this.zero.setBounds(120,500,120,100);
-        this.zero.setSelected(false);
-        this.zero.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.zero.setBackground(new Color(181,181,181));
-        this.zero.setBorder(new MatteBorder(4,4,4,4, new Color(171,171,171)));
-        this.zero.setFocusPainted(false);
-        this.frame.add(this.zero);
-        this.zero.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isResult) {
-                    clear();
+                break;
+            case "CA":
+                clear();
+                break;
+            case "DEL":
+                deleteLastElement();
+                break;
+            case "HIST":
+                this.showHistory = !this.showHistory;
+                if (this.showHistory) {
+                    this.frame.setSize(this.frame.getWidth() * 2, this.frame.getHeight());
+                } else {
+                    this.frame.setSize(this.frame.getWidth() / 2, this.frame.getHeight());
                 }
-                input.add("0");
-                operatorCount = 0;
-                updateInputLabel();
-            }
-        });
-
-        this.equals.setBounds(240,500,240,100);
-        this.equals.setSelected(false);
-        this.equals.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-        this.equals.setBackground(new Color(255,106,0));
-        this.equals.setBorder(new MatteBorder(4,4,4,4, new Color(245,96,0)));
-        this.equals.setFocusPainted(false);
-        this.frame.add(this.equals);
-        this.equals.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+                break;
+            case "=":
                 evaluate();
-                calculate();
-                lockDecimal = false;
-            }
-        });
-
-
-
-//        this.frame.getContentPane().add(this.scrollPane);
-//        this.scrollPane.setVisible(true);
-        this.frame.setResizable(false);
-        this.frame.setVisible(true);
-        this.frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+                if (!getOutputLabel().getText().equals("NaN")) {
+                    calculate();
+                } else {
+                    this.isResult = true;
+                }
+                this.lockDecimal = false;
+        }
     }
 
     /**
@@ -681,8 +335,10 @@ public class Calculator {
     private void clear() {
         this.input.clear();
         this.output.clear();
-        this.inputLabel.setText("");
-        this.outputLabel.setText("");
+        getInputLabel().setText("TEXT");
+        getInputLabel().setForeground(Color.BLACK);
+        getOutputLabel().setText("TEXT");
+        getOutputLabel().setForeground(Color.BLACK);
         this.operatorCount = 0;
         this.lockDecimal = false;
         this.isResult = false;
@@ -770,17 +426,18 @@ public class Calculator {
         for (String str : this.input) {
             sb.append(str);
         }
-        this.inputLabel.setText(sb.toString());
+        getInputLabel().setText(sb.toString());
+        getInputLabel().setForeground(Color.WHITE);
     }
 
     /**
      * Converts from String to double, using the String Builder
      * it builds up the numbers digit by digit, also deals with
-     * operator, + is discarded, - is discarded as well since
-     * 1-1 is 1+-1, therefore multiplies the second number by -1
+     * operators, + is discarded, - is discarded as well since
+     * 1-1 is 1+-1, therefore multiplies the second number by -1,
      * * is replaced by null and / is converted to * since 5/5 is
      * 5 * 1/5, resulting in an Array List that only contains
-     * positive and negative numbers, and also doubles, and null
+     * positive and negative doubles, and null which
      * signifies multiplication, division by zero results in
      * short-circuiting the equation and displays NaN
      */
@@ -792,7 +449,7 @@ public class Calculator {
             if (this.OPERATORS.contains(getElementFromInput(i))) {
                 if ("/".equals(getElementFromInput(i))) {
                     num = checkFormat(sb.toString());
-                    if (this.outputLabel.getText().equals("NaN")) {
+                    if (getOutputLabel().getText().equals("NaN")) {
                         break;
                     }
                     this.output.add(num);
@@ -821,7 +478,7 @@ public class Calculator {
             }
         }
         num = checkFormat(sb.toString());
-        if (!this.outputLabel.getText().equals("NaN")) {
+        if (!getOutputLabel().getText().equals("NaN")) {
             this.output.add(num);
         }
     }
@@ -842,7 +499,8 @@ public class Calculator {
         } else if (this.isDivision) {
             this.isDivision = false;
             if (result == 0.0) {
-                this.outputLabel.setText("NaN");
+                getOutputLabel().setText("NaN");
+                getOutputLabel().setForeground(Color.WHITE);
             } else {
                 result = 1.0 / result;
             }
@@ -876,106 +534,92 @@ public class Calculator {
         for (int i = 0; i < this.output.size(); i++) {
             this.result += this.output.get(i);
         }
-        outputLabel.setText(String.valueOf(this.result));
-        isResult = true;
+        getOutputLabel().setText(String.valueOf(this.result));
+        getOutputLabel().setForeground(Color.WHITE);
+        this.isResult = true;
         addToHistory();
         displayHistory();
     }
 
     /**
-     * Displays the history, the result is a button,
-     * when clicked it starts a new equation starting
-     * with it, also resets the history array so the
-     * history is limited but still better than nothing.
-     * I tried doing it differently, for now
-     * this will do
+     * displays the equation calculated, NaN won't reach this
+     * method, the equation is a simple label and the result is
+     * a button which can be pressed, more on that in the class
+     * constructor and historyElementPressed method, also
+     * clears the history ArrayList
      */
     private void displayHistory() {
-        if (this.historyArray.size() > 12) {
-            this.index = 0;
-            this.historyBtn1.setText(this.historyArray.get(13));
-            this.historyLbl1.setText(this.historyArray.get(12));
-            this.historyArray.clear();
-        }
-        for (int i = this.index; i < this.historyArray.size(); i += 2) {
-            switch (i) {
-                case 0:
-                    this.historyBtn1.setText(this.historyArray.get(i+1));
-                    this.historyLbl1.setText(this.historyArray.get(i));
-                    break;
-                case 2:
-                    this.historyBtn2.setText(this.historyArray.get(i+1));
-                    this.historyLbl2.setText(this.historyArray.get(i));
-                    break;
-                case 4:
-                    this.historyBtn3.setText(this.historyArray.get(i+1));
-                    this.historyLbl3.setText(this.historyArray.get(i));
-                    break;
-                case 6:
-                    this.historyBtn4.setText(this.historyArray.get(i+1));
-                    this.historyLbl4.setText(this.historyArray.get(i));
-                    break;
-                case 8:
-                    this.historyBtn5.setText(this.historyArray.get(i+1));
-                    this.historyLbl5.setText(this.historyArray.get(i));
-                    break;
-                case 10:
-                    this.historyBtn6.setText(this.historyArray.get(i+1));
-                    this.historyLbl6.setText(this.historyArray.get(i));
-                    break;
+        this.label = new JLabel(this.history.get(0));
+        this.label.setFont(this.font);
+        this.label.setForeground(Color.WHITE);
+        this.label.setMinimumSize(new Dimension(500, 100));
+        this.label.setBorder(new MatteBorder(15,15,15,15, Color.BLACK));
+        this.historyPanel.add(this.label);
+
+        this.button = new JButton(this.history.get(1));
+        this.button.setForeground(Color.WHITE);
+        this.button.setBackground(Color.BLACK);
+        this.button.setFont(this.font);
+        this.button.setMinimumSize(new Dimension(500, 100));
+        this.button.setHorizontalAlignment(SwingConstants.LEFT);
+        this.button.setBorder(new MatteBorder(15,15,15,15, Color.BLACK));
+        this.button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                historyElementPressed(e.getActionCommand());
             }
-            this.index += 2;
-        }
+        });
+
+        this.historyPanel.add(this.button);
+        this.history.clear();
     }
 
-//    private void displayHistory2() {
-//        int n = 50;
-//        for (int i = 0; i < this.historyArray.size(); i += 2) {
-//            JButton res = new JButton(this.historyArray.get(i+1));
-//            res.setBounds(0,this.historyY,480,50);
-//            res.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-//            res.setForeground(new Color(255,255,255));
-//            res.setBackground(new Color(0,0,0));
-//            res.setHorizontalAlignment(SwingConstants.RIGHT);
-//            res.setBorder(null);
-//            res.setFocusable(false);
-////            this.scrollPane.add(res);
-//            res.addActionListener(new ActionListener() {
-//                @Override
-//                public void actionPerformed(ActionEvent e) {
-//                    if (isResult) {
-//                        clear();
-//                        input.add(res.getText());
-//                        inputLabel.setText(res.getText());
-//                    }
-//                }
-//            });
-//
-//            this.historyY -= n;
-//            JLabel equation = new JLabel(this.historyArray.get(i));
-//            System.out.println(this.historyArray.get(i));
-//            equation.setBounds(0,this.historyY,480,50);
-//            equation.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-//            equation.setForeground(new Color(255,255,255));
-//            equation.setHorizontalAlignment(SwingConstants.RIGHT);
-//            equation.setBorder(null);
-//            equation.setFocusable(false);
-////            this.scrollPane.add(equation);
-//            this.historyY -= n;
-//        }
-//        this.historyArray.clear();
-//    }
-
     /**
-     * appends the equation and the result to the
-     * history array
+     * appends to the history ArrayList
+     * self-explanatory
      */
     private void addToHistory() {
         StringBuilder sb = new StringBuilder();
         for (String str : this.input) {
             sb.append(str);
         }
-        this.historyArray.add(sb + "=");
-        this.historyArray.add(String.valueOf(this.result));
+        this.history.add(sb + "=");
+        this.history.add(String.valueOf(this.result));
+    }
+
+    /**
+     * if in the input the last element is an operator
+     * the pressed value will append to that equation,
+     * otherwise starts a new one starting with the value
+     * @param str the value of the button that was pressed
+     */
+    private void historyElementPressed(String str) {
+        if (this.OPERATORS.contains(getElementFromInput(getLastIndexOfInput()))) {
+            this.input.add(str);
+            this.operatorCount = 0;
+            updateInputLabel();
+        } else {
+            clear();
+            this.input.add(str);
+            updateInputLabel();
+        }
+    }
+
+    /**
+     * returns the input JLabel since it was made by a method
+     * and doesn't have a corresponding name
+     * @return returns the input JLabel
+     */
+    private JLabel getInputLabel() {
+        return (JLabel) this.calculatorPanel.getComponent(0);
+    }
+
+    /**
+     * returns the output JLabel since it was made by a method
+     * and doesn't have a corresponding name
+     * @return returns the output JLabel
+     */
+    private JLabel getOutputLabel() {
+        return (JLabel) this.calculatorPanel.getComponent(1);
     }
 }
